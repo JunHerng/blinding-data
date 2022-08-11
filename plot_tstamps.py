@@ -14,10 +14,14 @@
 #     fprintf(outfile, "%08x\n",rbbuffer[i]);
 # i.e. second word is high word
 
+    """Generic timestamp processing and plotting functions.
+    See other files for more specific plots.
+    """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-TIMESTAMP_DATA = "read7log_b225_0_50000_q500000_b2"
+TIMESTAMP_DATA = "read7log_b225_50000_0_q500000_b2"
 
 files = ['read7log_b225_10000_0_q500000_b2',
          'read7log_b225_20000_0_q500000_b2',
@@ -49,7 +53,30 @@ def foo(file: str):
     timings = dwords >> np.int64(10)
     channels = dwords & 0b1111
 
-    return timings[(channels & 0b0001).astype(bool)], timings[(channels & 0b0010).astype(bool)], (dwords & 0b100000).astype(bool)
+    return timings[(channels & 0b0001).astype(bool)], timings[(channels & 0b0010).astype(bool)], (dwords & 0b100000).astype(bool), len(data)
+
+def blinded_frac(file: str):
+    """Returns the fraction of blinded timestamps.
+
+    Args:
+        file (str): filename
+
+    Returns:
+        float: fraction of blinded bits
+    """
+    blinded = sum(foo(file)[-2])
+    total = foo(file)[-1]
+    print(blinded)
+    print(total)
+    print(blinded/total)
+    
+    return blinded/total
+
+print(blinded_frac(files2[0]))
+print(blinded_frac(files2[1]))
+print(blinded_frac(files2[2]))
+print(blinded_frac(files2[3]))
+print(blinded_frac(files2[4]))
 
 # plt.plot(foo(TIMESTAMP_DATA)[0], ".", markersize=1, label="Channel 1")
 # plt.plot(foo(TIMESTAMP_DATA)[1], ".", markersize=1, label="Channel 2")
@@ -58,7 +85,8 @@ def foo(file: str):
 # plt.plot(foo(files[2])[0], ".", markersize=1, label="a = 30000")
 # plt.plot(foo(files[3])[0], ".", markersize=1, label="a = 40000")
 # plt.plot(foo(files[4])[0], ".", markersize=1, label="a = 50000")
-plt.plot(foo(TIMESTAMP_DATA)[-1], ".", markersize=1, label="blind mode")
+# plt.plot(foo(TIMESTAMP_DATA)[-1], ".", markersize=1, label="blind mode")
+
 # plt.show()
 
 '''
@@ -114,6 +142,6 @@ axs[1,4].plot(foo(files[4])[-1], ".", markersize=1)
 axs[1,4].set_title('a = 50000')
 '''
 
-plt.tight_layout() # Prevent overlapping titles
-plt.legend(loc='upper left')
-plt.show()
+# plt.tight_layout() # Prevent overlapping titles
+# plt.legend(loc='upper left')
+# plt.show()
